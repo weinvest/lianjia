@@ -2,6 +2,7 @@
 import scrapy
 import scrapy.shell
 import lianjiaCrawl.settings as settings
+import lianjiaCrawl.items as items
 class LianjiaSpider(scrapy.Spider):
     name = "lianjia"
     headers={
@@ -33,10 +34,35 @@ class LianjiaSpider(scrapy.Spider):
                                , callback=self.parse_xiaoqu)]
 
     def parse_xiaoqu(self, response):
-        scrapy.shell.inspect_response(response, self)
-        hosuses = response.css('#house-lst')
-        hosuses
-        print hosuses
+        from functools import partial
+        for jsXiaoQu in response.css('ul.house-lst>li'):
+            xiaoQu = items.XiaoQu()
+            where = jsXiaoQu.css('a.actshowMap_list ::attr("xiaoqu")').extract_first()
+            where = where[1:-2]
+            where = where.split(',')
+            xiaoQu['lat'] = where[0].strip()
+            xiaoQu['lon'] = where[1].strip()
+            xiaoQu['name'] = where[2].strip()
+            xiaoQu['districtName'] = jsXiaoQu.css('a.actshowMap_list ::attr("districtname")').extract_first()
+            xiaoQu['plateName'] = jsXiaoQu.css('a.actshowMap_list ::attr("platename")').extract_first()
+            xiaoQu['bookingQty'] = jsXiaoQu.css('div.square a.num ::text()').extract_first()
+
+            detailUrl = jsXiaoQu.css('a.selectDetail ::attr("href")').extract_first()
+            yield scrapy.Request(detailUrl
+                                 , headers=self.headers
+                                 , method={'cookiejar': response.meta['cookiejar']}
+                                 , callback=partial(self.parse_xiaoQuDetail, xiaoQu))
+
+    def parse_xiaoQuDetail(self, xiaoQu, response):
+        xiaoQu['realEstateType'] = ''
+        xiaoQu['completeTime'] = ''
+        xiaoQu['propertyFee'] = ''
+        xiaoQu['propertyCompany'] = ""
+        xiaoQu['propertyDevelopers'] = ''
+        xiaoQu['loopLine'] = ''
+        xiaoQu['city'] = ''
+
+        xiaoQu['avgPrice'] = response.css('span.p ::text()').extract_first()
 
     def parse_ershoufan(self, response):
         scrapy.shell.inspect_response(response, self)

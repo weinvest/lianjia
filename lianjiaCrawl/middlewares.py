@@ -70,7 +70,7 @@ class WebkitDownloader(object):
     def __init__(self):
         self.s = None
 
-    def login(self, url, userName, password):
+    def login(self, url, userName, password, headers):
         from ghost import Ghost
         self.s = Ghost().start()
         self.s.open(url, user_agent=settings.USER_AGENT)
@@ -86,7 +86,7 @@ class WebkitDownloader(object):
     def process_request(self, request, spider):
         if (type(request) is not FormRequest):
             if self.s is None:
-                self.login(request.url, spider.userName, spider.password)
+                self.login(request.url, spider.userName, spider.password, spider.headers)
             else:
                 self.s.click('a[href="%s"]' % request.url)
                 self.s.wait_for_page_loaded(15)
