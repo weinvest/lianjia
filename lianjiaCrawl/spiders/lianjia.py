@@ -28,9 +28,10 @@ class LianjiaSpider(scrapy.Spider):
                 ]
 
     def after_login(self, response):
-        return [scrapy.Request('http://sh.lianjia.com/xiaoqu'
+        url = self.start_url + 'xiaoqu'
+        return [scrapy.Request(url
                                , headers=self.headers
-                               , method={'cookiejar':response.meta['cookiejar']}
+                               , meta={'cookiejar':response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % url}
                                , callback=self.parse_xiaoqu)]
 
     def parse_xiaoqu(self, response):
@@ -45,24 +46,32 @@ class LianjiaSpider(scrapy.Spider):
             xiaoQu['name'] = where[2].strip()
             xiaoQu['districtName'] = jsXiaoQu.css('a.actshowMap_list ::attr("districtname")').extract_first()
             xiaoQu['plateName'] = jsXiaoQu.css('a.actshowMap_list ::attr("platename")').extract_first()
-            xiaoQu['bookingQty'] = jsXiaoQu.css('div.square a.num ::text()').extract_first()
+            xiaoQu['bookingQty'] = jsXiaoQu.css('div.square span.num ::text').extract_first()
 
-            detailUrl = jsXiaoQu.css('a.selectDetail ::attr("href")').extract_first()
-            yield scrapy.Request(detailUrl
+            detailUrl = jsXiaoQu.css('a[name="selectDetail"] ::attr("href")').extract_first()
+            yield scrapy.Request(response.url.replace('/xiaoqu', detailUrl)
                                  , headers=self.headers
-                                 , method={'cookiejar': response.meta['cookiejar']}
+                                 , meta={'cookiejar':response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % detailUrl}
                                  , callback=partial(self.parse_xiaoQuDetail, xiaoQu))
 
     def parse_xiaoQuDetail(self, xiaoQu, response):
-        xiaoQu['realEstateType'] = ''
-        xiaoQu['completeTime'] = ''
-        xiaoQu['propertyFee'] = ''
-        xiaoQu['propertyCompany'] = ""
-        xiaoQu['propertyDevelopers'] = ''
-        xiaoQu['loopLine'] = ''
-        xiaoQu['city'] = ''
+        scrapy.shell.inspect_response(response, self)
+        for li in response.css("div.col-2.clearfix li"):
+            key = li.css('label ::text').extract_first()
+            value = li.css('span.other ::text').extract_first().strip()
+            v = {
+                '': 'realEstateType'
+                ,'1': 'completeTime'
+                ,'2': 'propertyFee'
+                ,'3': 'propertyCompany'
+                ,'4': 'propertyDevelopers'
+                ,'5': 'loopline'
+                ,'6': 'city'
+            }
 
-        xiaoQu['avgPrice'] = response.css('span.p ::text()').extract_first()
+            xiaoQu[v[key]] = value
+
+        xiaoQu['avgPrice'] = response.css('span.p ::text').extract_first().strip()
 
     def parse_ershoufan(self, response):
         scrapy.shell.inspect_response(response, self)

@@ -88,7 +88,8 @@ class WebkitDownloader(object):
             if self.s is None:
                 self.login(request.url, spider.userName, spider.password, spider.headers)
             else:
-                self.s.click('a[href="%s"]' % request.url)
+                print request.meta['cssSelector']
+                self.s.click(request.meta['cssSelector'])
                 self.s.wait_for_page_loaded(15)
             return HtmlResponse(request.url, body=self.s.content, encoding='utf-8')
 
