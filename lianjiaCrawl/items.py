@@ -24,6 +24,9 @@ class XiaoQu(scrapy.Item):
     bookingQty = scrapy.Field()
 
 
+class ErShouFan(scrapy.Item):
+    totalPrice = scrapy.Field()
+
 
 class LianjiacrawlItem(scrapy.Item):
     # define the fields for your item here like:

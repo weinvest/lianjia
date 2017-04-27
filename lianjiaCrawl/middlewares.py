@@ -82,14 +82,19 @@ class WebkitDownloader(object):
         self.s.set_field_value('#user_password', password)
         self.s.click('#login-user-btn')
         self.s.wait_for_selector('span.user-name')
+        self.s.show()
+        self.s.sleep(13)
 
     def process_request(self, request, spider):
-        if (type(request) is not FormRequest):
-            if self.s is None:
-                self.login(request.url, spider.userName, spider.password, spider.headers)
-            else:
-                print request.meta['cssSelector']
-                self.s.click(request.meta['cssSelector'])
-                self.s.wait_for_page_loaded(15)
-            return HtmlResponse(request.url, body=self.s.content, encoding='utf-8')
+        if not spider.crawlingDeals:
+            return None
+        else:
+            if (type(request) is not FormRequest):
+                if self.s is None:
+                    self.login(request.url, spider.userName, spider.password, spider.headers)
+                else:
+                    print request.meta['cssSelector']
+                    self.s.click(request.meta['cssSelector'])
+                    self.s.wait_for_page_loaded(15)
+                return HtmlResponse(request.url, body=self.s.content, encoding='utf-8')
 
