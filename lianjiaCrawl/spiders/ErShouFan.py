@@ -25,11 +25,11 @@ detail_mapping = {
             , u'建筑面积：': 'area'
             , u'房屋朝向：': 'orientations'
             , u'配备电梯：': 'elevator'
-            , u'装修情况： ': 'decorate'
+            , u'装修情况：': 'decorate'
             , u'上次交易：': 'lastTrade'
             , u'房屋类型：': 'realEstateType'
             , u'房本年限：': 'ownershipCertificateDuration'
-            , u'单价：': 'orientations'
+            , u'单价：': 'unitPrice'
             , u'首付：': 'downPayment'
             , u'月供：': 'monthlyPayments'
             , u'年代：': 'completeYear'
@@ -37,7 +37,7 @@ detail_mapping = {
         }
 
 def parse_ershoufan_detail(self, response):
-    #scrapy.shell.inspect_response(response, self)
+    # scrapy.shell.inspect_response(response, self)
     from CSSUtils import extract
     erShouFan = items.ErShouFan()
     priceNode = response.css('div.houseInfo div.price')
@@ -46,18 +46,17 @@ def parse_ershoufan_detail(self, response):
     erShouFan['address'] = extract(response.css('p.addrEllipsis.fl.ml_5 ::text'))
 
     details = {}
-    for tr in response.css('table.aroundInfo tbody tr td'):
-        key = tr.css('span.title ::text')
-        value = tr.css("::text")
-
+    # body > div.esf - top > div.cj - cun > div.content > table > tbody > tr:nth - child(1) > td:nth - child(1)
+    for tr in response.css('table.aroundInfo tr td'):
+        key = tr.css('span.title ::text').extract_first()
+        value = tr.css("::text").extract()[-1]
         if key is None or value is None:
             continue
         details[key.strip()] = value.strip()
 
     for li in response.css("div.content ul li"):
-        key = li.css('span.label').extract_first()
-        value = li.css('::text').extract_first()
-
+        key = li.css('span.label::text').extract_first()
+        value = li.css('::text').extract()[-1]
         if key is None or value is None:
             continue
         details[key.strip()] = value.strip()
@@ -71,5 +70,6 @@ def parse_ershoufan_detail(self, response):
         else:
             pass
             # print 'Error key:' + key
+        # print "%s:%s" % (key, value)
 
     yield erShouFan
