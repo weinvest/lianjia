@@ -19,5 +19,57 @@ def parse_ershoufan(self, response):
                              , meta={'cookiejar': response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % detailUrl}
                              , callback=self.parse_ershoufan)
 
+detail_mapping = {
+            u'房屋户型：': 'layout'
+            , u'所在楼层：': 'floor'
+            , u'建筑面积：': 'area'
+            , u'房屋朝向：': 'orientations'
+            , u'配备电梯：': 'elevator'
+            , u'装修情况： ': 'decorate'
+            , u'上次交易：': 'lastTrade'
+            , u'房屋类型：': 'realEstateType'
+            , u'房本年限：': 'ownershipCertificateDuration'
+            , u'单价：': 'orientations'
+            , u'首付：': 'downPayment'
+            , u'月供：': 'monthlyPayments'
+            , u'年代：': 'completeYear'
+            , u'环线：': 'loopLine'
+        }
+
 def parse_ershoufan_detail(self, response):
-    pass
+    #scrapy.shell.inspect_response(response, self)
+    from CSSUtils import extract
+    erShouFan = items.ErShouFan()
+    priceNode = response.css('div.houseInfo div.price')
+    erShouFan['totalPrice'] = extract(priceNode.css('div.mainInfo ::text')) + extract(priceNode.css('span.unit ::text'))
+    erShouFan['xiaoQu'] = extract(response.css('a.propertyEllipsis.ml_5 ::text')) + extract(response.css('span.areaEllipsis ::text'))
+    erShouFan['address'] = extract(response.css('p.addrEllipsis.fl.ml_5 ::text'))
+
+    details = {}
+    for tr in response.css('table.aroundInfo tbody tr td'):
+        key = tr.css('span.title ::text')
+        value = tr.css("::text")
+
+        if key is None or value is None:
+            continue
+        details[key.strip()] = value.strip()
+
+    for li in response.css("div.content ul li"):
+        key = li.css('span.label').extract_first()
+        value = li.css('::text').extract_first()
+
+        if key is None or value is None:
+            continue
+        details[key.strip()] = value.strip()
+
+    for key, value in details.items():
+        key = key.strip()
+        value = value.strip()
+        v = detail_mapping
+        if key in v:
+            erShouFan[v[key]] = value
+        else:
+            pass
+            # print 'Error key:' + key
+
+    yield erShouFan

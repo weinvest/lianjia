@@ -29,9 +29,11 @@ class LianjiaSpider(scrapy.Spider):
         self.parse_xiaoQuDetail = partial(XiaoQu.parse_xiaoQuDetail, self)
 
         self.parse_ershoufan = partial(ErShouFan.parse_ershoufan, self)
+        self.parse_ershoufan_detail = partial(ErShouFan.parse_ershoufan_detail, self)
 
     def start_requests(self):
-        urls = {'/xiaoqu' : self.parse_xiaoqu, '/ershoufang': self.parse_ershoufan}
+        #urls = {'/xiaoqu' : self.parse_xiaoqu, '/ershoufang': self.parse_ershoufan}
+        urls = {'/ershoufang': self.parse_ershoufan}
         for url, callback in urls.items():
             yield scrapy.Request(self.domain + url
                                  , headers=self.headers
