@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from functools import partial
 import lianjiaCrawl.items as items
 
 def parse_ershoufan(self, response):
@@ -16,7 +15,7 @@ def parse_ershoufan(self, response):
         nextPageUrl = next.extract_first()
         yield scrapy.Request(response.urljoin(nextPageUrl)
                              , headers=self.headers
-                             , meta={'cookiejar': response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % detailUrl}
+                             , meta={'cookiejar': response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % nextPageUrl}
                              , callback=self.parse_ershoufan)
 
 detail_mapping = {

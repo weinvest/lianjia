@@ -27,7 +27,7 @@ def parse_xiaoqu(self, response):
         nextPageUrl = next.extract_first()
         yield scrapy.Request(response.urljoin(nextPageUrl)
                              , headers=self.headers
-                             , meta={'cookiejar': response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % detailUrl}
+                             , meta={'cookiejar': response.meta['cookiejar'], 'cssSelector': 'a[href="%s"]' % nextPageUrl}
                              , callback=self.parse_xiaoqu)
 
 

@@ -3,8 +3,9 @@ import scrapy
 import scrapy.shell
 import lianjiaCrawl.settings as settings
 import XiaoQu
-from functools import partial
 import ErShouFan
+import ChengJiao
+from functools import partial
 class LianjiaSpider(scrapy.Spider):
     name = "lianjia"
     headers={
@@ -31,9 +32,12 @@ class LianjiaSpider(scrapy.Spider):
         self.parse_ershoufan = partial(ErShouFan.parse_ershoufan, self)
         self.parse_ershoufan_detail = partial(ErShouFan.parse_ershoufan_detail, self)
 
+        self.parse_chengjiao = partial(ChengJiao.parse_chengjiao, self)
+        self.parse_chengjiao_detail = partial(ChengJiao.parse_chengjiao_detail, self)
+
     def start_requests(self):
-        #urls = {'/xiaoqu' : self.parse_xiaoqu, '/ershoufang': self.parse_ershoufan}
-        urls = {'/ershoufang': self.parse_ershoufan}
+        # urls = {'/xiaoqu' : self.parse_xiaoqu, '/ershoufang': self.parse_ershoufan}
+        urls = {'/chengjiao': self.parse_chengjiao}
         for url, callback in urls.items():
             yield scrapy.Request(self.domain + url
                                  , headers=self.headers

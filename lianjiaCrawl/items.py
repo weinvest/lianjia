@@ -43,8 +43,16 @@ class ErShouFan(scrapy.Item):
     realEstateType = scrapy.Field() # 房屋类型
     ownershipCertificateDuration = scrapy.Field() #房本年限
 
+class ChengJiao(scrapy.Item):
+    tradeTime = scrapy.Field()
+    agency = scrapy.Field() #中介
+    totalPrice = scrapy.Field() #挂牌总价
+    unitPrice = scrapy.Field() #挂牌单价
+    floor = scrapy.Field() #楼层
+    completeYear = scrapy.Field() #年代
+    decorator = scrapy.Field() #装修
+    orientations = scrapy.Field() #朝向
+    xiaoQu = scrapy.Field()
+    address = scrapy.Field()
+    sourceNo = scrapy.Field() #词源编号
 
-class LianjiacrawlItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
